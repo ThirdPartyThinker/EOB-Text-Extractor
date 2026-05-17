@@ -81,12 +81,21 @@ have permission to install software.
 4. Move the extracted `EOB-Text-Extractor` folder somewhere easy to find
    inside your secured clinic storage — for example your Documents folder.
 
-### Step 6: Install the program's components
+### Step 6: Run the setup program
 
 1. Open the `EOB-Text-Extractor` folder in File Explorer.
 2. Double-click the file named **`install_windows.bat`**.
-3. A black window will open and install the components. Wait until it says
-   **"Setup complete"**, then press a key to close it.
+3. A black window opens and runs the guided setup. It will:
+   - install the program's components,
+   - check that Tesseract and poppler are available,
+   - create the `eobs_in` and `eobs_out` folders for you,
+   - run a quick self-test on fake data.
+4. Read the summary at the bottom:
+   - **"SETUP COMPLETE"** means everything is ready.
+   - **"SETUP FINISHED WITH ... ITEM(S) NEEDING ATTENTION"** means it
+     lists exactly what to fix (usually a missed PATH step). Fix those,
+     then double-click `install_windows.bat` again.
+5. Press a key to close the window.
 
 > If Windows shows a blue "Windows protected your PC" box, click
 > **More info** -> **Run anyway**. The file is a small text script you can
