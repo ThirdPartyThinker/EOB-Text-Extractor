@@ -12,6 +12,16 @@ access controls, audit logging).**
 
 ---
 
+> ### 🦷 Dental clinic staff: start here
+>
+> If you work at a clinic and just want to convert real EOB PDFs to text,
+> **follow [`CLINIC_GUIDE.md`](CLINIC_GUIDE.md)** — a plain-language,
+> step-by-step Windows guide with no programming required. You can ignore
+> the rest of this README, which is written for software developers and
+> covers testing with synthetic data.
+
+---
+
 A Python tool that converts dental EOB PDFs into plain text files. It runs
 **fully offline** using only free, open-source libraries — no calls to
 OpenAI, Anthropic, AWS, Google Cloud, Azure, or any external API at any
