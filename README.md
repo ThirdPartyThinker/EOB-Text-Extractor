@@ -12,6 +12,16 @@ access controls, audit logging).**
 
 ---
 
+> ### 🦷 Dental clinic staff: start here
+>
+> If you work at a clinic and just want to convert real EOB PDFs to text,
+> **follow [`CLINIC_GUIDE.md`](CLINIC_GUIDE.md)** — a plain-language,
+> step-by-step Windows guide with no programming required. You can ignore
+> the rest of this README, which is written for software developers and
+> covers testing with synthetic data.
+
+---
+
 A Python tool that converts dental EOB PDFs into plain text files. It runs
 **fully offline** using only free, open-source libraries — no calls to
 OpenAI, Anthropic, AWS, Google Cloud, Azure, or any external API at any
@@ -82,7 +92,8 @@ pip install -r requirements.txt
 You also need two system tools — the **Tesseract** OCR engine and
 **poppler** (used by `pdf2image` to render PDF pages):
 
-**Windows**
+**Windows** — see the [full Windows step-by-step guide](#windows-step-by-step-guide)
+below. In brief:
 - Tesseract: install the UB Mannheim build from
   <https://github.com/UB-Mannheim/tesseract/wiki>. Add its install folder to
   your `PATH` (or set `pytesseract.pytesseract.tesseract_cmd`).
@@ -139,6 +150,152 @@ pytest
 ```
 
 (The OCR fallback test is skipped automatically if Tesseract is not installed.)
+
+## Windows step-by-step guide
+
+This section walks through a complete Windows setup and day-to-day use,
+assuming no prior Python experience. Run it on a **HIPAA-compliant
+machine** if you will process real EOBs.
+
+### Part A — One-time installation
+
+**Step 1 — Install Python**
+
+1. Go to <https://www.python.org/downloads/windows/> and download the
+   latest Python 3 (64-bit) installer.
+2. Run the installer. On the first screen, **check the box
+   "Add python.exe to PATH"**, then click "Install Now".
+3. Verify it worked: open the Start menu, type `cmd`, open
+   **Command Prompt**, and run:
+   ```bat
+   python --version
+   ```
+   You should see something like `Python 3.12.x`.
+
+**Step 2 — Install Tesseract (the OCR engine)**
+
+1. Download the Windows installer from the UB Mannheim build page:
+   <https://github.com/UB-Mannheim/tesseract/wiki>
+2. Run it. Note the install folder — by default
+   `C:\Program Files\Tesseract-OCR`.
+3. Add that folder to your `PATH`:
+   - Start menu -> search "environment variables" -> open
+     **"Edit the system environment variables"**.
+   - Click **Environment Variables...**
+   - Under **System variables**, select **Path** -> **Edit** -> **New**,
+     and paste `C:\Program Files\Tesseract-OCR`.
+   - Click OK on all dialogs.
+4. Close and reopen Command Prompt, then verify:
+   ```bat
+   tesseract --version
+   ```
+
+**Step 3 — Install poppler (needed to render PDFs for OCR)**
+
+1. Download the latest poppler release zip from
+   <https://github.com/oschwartz10612/poppler-windows/releases>
+2. Extract it somewhere permanent, e.g. `C:\poppler`.
+3. Inside, find the `bin` folder (e.g.
+   `C:\poppler\poppler-24.08.0\Library\bin`).
+4. Add that `bin` folder to your `PATH` using the same steps as Step 2.3.
+5. Close and reopen Command Prompt, then verify:
+   ```bat
+   pdftoppm -h
+   ```
+
+**Step 4 — Get the project code**
+
+Either download the repository as a ZIP from GitHub (green **Code** button
+-> **Download ZIP**) and extract it, **or** install Git and clone it:
+```bat
+git clone https://github.com/ThirdPartyThinker/EOB-Text-Extractor.git
+```
+
+**Step 5 — Install the Python dependencies**
+
+In Command Prompt, change into the project folder and install:
+```bat
+cd C:\path\to\EOB-Text-Extractor
+python -m pip install -r requirements.txt
+```
+
+**Step 6 — Confirm everything works**
+
+```bat
+python -m pytest
+```
+All 7 tests should pass (this uses synthetic data only — no real PHI).
+
+### Part B — Processing your EOBs (do this each time)
+
+**Step 1 — Create input and output folders**
+
+Inside the project folder, make two folders. You can do this in File
+Explorer, or in Command Prompt:
+```bat
+cd C:\path\to\EOB-Text-Extractor
+mkdir eobs_in
+mkdir eobs_out
+```
+
+**Step 2 — Put your EOB PDFs into the input folder**
+
+Copy or drag your EOB PDF files into the `eobs_in` folder. You can add as
+many as you like. Filenames are preserved, so `claim_smith.pdf` becomes
+`claim_smith.txt`.
+
+**Step 3 — Run the batch processor**
+
+```bat
+cd C:\path\to\EOB-Text-Extractor
+python run_batch.py --input eobs_in --output eobs_out
+```
+
+You will see a HIPAA notice, then one log line per file showing the
+filename and whether `pdfplumber` or `ocr` was used. Example:
+```
+INFO Extracted claim_smith.pdf via pdfplumber (2 pages, 1843 chars, 0.04s)
+INFO Wrote claim_smith.txt and claim_smith.json
+```
+
+**Step 4 — Collect your results**
+
+Open the `eobs_out` folder. For every `input.pdf` you will find:
+- `input.txt`  — the extracted plain text
+- `input.json` — metadata only (page count, method, timing — **no PHI**)
+
+Open the `.txt` files in Notepad or any text editor.
+
+**Step 5 (optional) — Tune OCR for scanned PDFs**
+
+If a scanned PDF was not OCR'd (or a text PDF was OCR'd unnecessarily),
+adjust the threshold — the average characters per page below which OCR
+kicks in (default 50):
+```bat
+python run_batch.py --input eobs_in --output eobs_out --ocr-threshold 80
+```
+
+**Step 6 (optional) — Process a single file in Python**
+
+```bat
+python
+```
+```python
+>>> from eob_extract import extract_text, extract_eob_fields
+>>> text, metadata = extract_text(r"C:\path\to\one_eob.pdf")
+>>> print(metadata)
+>>> print(extract_eob_fields(text))
+>>> exit()
+```
+
+### Troubleshooting (Windows)
+
+| Symptom | Fix |
+|---------|-----|
+| `'python' is not recognized` | Python was installed without "Add to PATH". Re-run the installer and check that box. |
+| `tesseract is not installed or it's not in your PATH` | Redo Step 2.3; reopen Command Prompt so the new `PATH` takes effect. |
+| `Unable to get page count. Is poppler installed and in PATH?` | Redo Step 3.4; reopen Command Prompt. |
+| Scanned PDF produced an almost-empty `.txt` | OCR may have failed — confirm `tesseract --version` works, then re-run. |
 
 ## Best-effort field extraction
 
