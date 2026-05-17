@@ -50,16 +50,26 @@ point in the pipeline. It works with networking disabled.
 
 ### Google Colab (synthetic data only)
 
+Open `eob_extract_colab.ipynb` in Colab and run the cells top to bottom.
+Colab starts with an empty working directory, so the notebook's **first
+cell clones this repository** before anything else — otherwise commands
+like `pip install -r requirements.txt` fail with
+`Could not open requirements file`. The remaining cells install the
+system and Python dependencies:
+
 ```python
-# Cell — system dependencies
+# Cell 1 — clone the repo (required: Colab has no project files yet)
+!git clone https://github.com/ThirdPartyThinker/EOB-Text-Extractor.git
+%cd EOB-Text-Extractor
+
+# Cell 2 — system dependencies
 !apt-get update && apt-get install -y tesseract-ocr poppler-utils
 
-# Cell — Python dependencies
+# Cell 3 — Python dependencies
 !pip install -r requirements.txt
 ```
 
-Then run the notebook `eob_extract_colab.ipynb`. **Do not upload real EOBs
-to Colab.**
+**Do not upload real EOBs to Colab.**
 
 ### Local install
 
