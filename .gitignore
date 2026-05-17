@@ -226,3 +226,5 @@ synthetic_in/
 synthetic_out/
 !README.pdf
 !docs/*.pdf
+# Project files that are safe to track despite the *.txt rule above
+!requirements.txt
