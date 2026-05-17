@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Never commit real or synthetic patient data
+*.pdf
+*.txt
+input/
+output/
+synthetic_in/
+synthetic_out/
+!README.pdf
+!docs/*.pdf
