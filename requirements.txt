@@ -1,0 +1,15 @@
+# EOB Text Extractor — pinned dependencies
+# All libraries are free, open-source, and run fully offline.
+
+# --- Extraction pipeline ---
+pdfplumber==0.11.4      # MIT      — text-based PDF extraction
+pypdf==4.3.1            # BSD      — PDF page counting / inspection
+pytesseract==0.3.13     # Apache 2.0 — Python wrapper for the Tesseract OCR engine
+pdf2image==1.17.0       # MIT      — render PDF pages to images for OCR
+Pillow==10.4.0          # HPND/PIL — image handling for OCR
+
+# --- Synthetic test-data generation only (not part of the extraction pipeline) ---
+reportlab==4.2.2        # BSD      — draw fake EOB PDFs for testing
+
+# --- Testing ---
+pytest==8.3.3           # MIT      — test runner
