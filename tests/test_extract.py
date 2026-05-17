@@ -6,6 +6,7 @@ directory, so no fixtures or real data are required.
 
 from __future__ import annotations
 
+import csv
 import json
 import shutil
 
@@ -79,6 +80,34 @@ def test_sidecar_keys_and_no_phi(tmp_path, text_pdf):
     blob = json.dumps(sidecar)
     for phi in ("TEST PATIENT", "000-00-0000", "FAKE-CLAIM"):
         assert phi not in blob
+
+
+def test_batch_writes_fields_csv(tmp_path, text_pdf):
+    """Batch run produces eob_fields.csv with one row per EOB and the
+    expected columns and values."""
+    in_dir = tmp_path / "in"
+    out_dir = tmp_path / "out"
+    in_dir.mkdir()
+    shutil.copy(text_pdf, in_dir / "synthetic_text.pdf")
+
+    process_directory(in_dir, out_dir, eob_extract.DEFAULT_OCR_THRESHOLD)
+
+    csv_path = out_dir / "eob_fields.csv"
+    assert csv_path.exists()
+
+    with csv_path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 1
+    row = rows[0]
+    expected_columns = {"filename", "claim_number", "date_of_service",
+                        "billed_amount", "paid_amount",
+                        "patient_responsibility", "procedure_codes"}
+    assert set(row.keys()) == expected_columns
+    assert row["filename"] == "synthetic_text.pdf"
+    assert row["claim_number"] == "FAKE-CLAIM-1001"
+    assert row["billed_amount"] == "150.00"
+    assert "D1110" in row["procedure_codes"]
 
 
 def test_batch_empty_input_directory(tmp_path):
