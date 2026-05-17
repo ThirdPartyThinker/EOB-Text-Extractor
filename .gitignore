@@ -220,10 +220,13 @@ __marimo__/
 # Never commit real or synthetic patient data
 *.pdf
 *.txt
+*.csv
 input/
 output/
 synthetic_in/
 synthetic_out/
+eobs_in/
+eobs_out/
 !README.pdf
 !docs/*.pdf
 # Project files that are safe to track despite the *.txt rule above

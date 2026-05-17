@@ -138,21 +138,47 @@ and run the installer again.
 1. In the `EOB-Text-Extractor` folder, double-click
    **`run_extractor.bat`**.
 2. A black window opens and shows the HIPAA notice, then a line for each
-   PDF as it is processed. It finishes with
-   **"Done. Your text files are in the eobs_out folder."**
+   PDF as it is processed. It finishes with a **"Done. Results are in the
+   eobs_out folder"** message.
 3. Press a key to close the window.
 
-### Step 3: Get your text files
+### Step 3: Get your results
 
 1. Open the **`eobs_out`** folder inside `EOB-Text-Extractor`.
 2. For each PDF you put in, you will find two files:
-   - **`<name>.txt`** — the EOB text. Double-click to open in Notepad.
+   - **`<name>.txt`** — the full EOB text. Double-click to open in Notepad.
    - **`<name>.json`** — a small technical summary (page count, timing).
      It contains **no patient information** and can be ignored.
-3. The `.txt` files keep the original names. `claim_jones.pdf` becomes
+   The `.txt` files keep the original names. `claim_jones.pdf` becomes
    `claim_jones.txt`.
+3. You will also find **one** spreadsheet file named **`eob_fields.csv`**.
+   Double-click to open it in Excel. It has **one row per EOB**, with
+   columns for the claim number, date of service, billed amount, paid
+   amount, patient responsibility, and procedure codes. This is a
+   **review worksheet** — see Step 4.
 
-### Step 4: Clear the folders for next time (recommended)
+### Step 4: Review the worksheet and enter into Open Dental
+
+The `eob_fields.csv` worksheet is filled in automatically, but the tool
+reads the numbers off the PDF using pattern-matching, which is **not
+perfect** — it varies by insurance company, and scanned EOBs can be
+misread.
+
+1. Open `eob_fields.csv` next to the original PDFs.
+2. For each row, **check the values against the original EOB PDF.**
+   Correct anything wrong, and fill in any blank cell by reading the PDF.
+3. Use the verified worksheet to **manually enter** the payments into
+   Open Dental.
+
+> **Important:** this tool does **not** post payments into Open Dental
+> automatically, and the `.csv` is not a file Open Dental can import.
+> Open Dental's automatic path is the **835 ERA** electronic file from
+> your insurance clearinghouse. The worksheet here is meant to make
+> **manual entry faster and more accurate**, with a person checking every
+> number. Treat `eob_fields.csv` as patient information and keep it inside
+> your secured clinic storage.
+
+### Step 5: Clear the folders for next time (recommended)
 
 After you have saved the text files where they belong, move the processed
 PDFs out of `eobs_in` and the results out of `eobs_out`, so the next batch
@@ -193,4 +219,6 @@ black window.
 | First-time setup | Do **Part 1** once |
 | Convert EOBs | Put PDFs in `eobs_in`, double-click `run_extractor.bat` |
 | Find results | Open the `eobs_out` folder |
+| Review fields | Open `eob_fields.csv`, check every value against the PDF |
+| Enter into Open Dental | Manual entry from the verified worksheet |
 | Where it's safe to run | A HIPAA-compliant clinic computer only |

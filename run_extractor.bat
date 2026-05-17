@@ -27,7 +27,9 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-echo  Done. Your text files are in the "eobs_out" folder.
+echo  Done. Results are in the "eobs_out" folder:
+echo    - one .txt file per EOB (the full text)
+echo    - eob_fields.csv (review worksheet, one row per EOB)
 echo ============================================================
 echo.
 pause

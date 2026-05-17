@@ -39,10 +39,16 @@ point in the pipeline. It works with networking disabled.
    metadata only — `filename`, `page_count`, `extraction_method`,
    `char_count`, `processing_seconds`, `timestamp_iso`. **The sidecar never
    contains extracted PHI.**
-4. **Optional structured extraction.** `extract_eob_fields(text)` uses regex
+4. **Structured fields worksheet.** The batch run also writes one combined
+   `eob_fields.csv` to the output directory — one row per EOB with the
+   best-effort structured fields (claim number, date of service, amounts,
+   procedure codes). Unlike the metadata sidecar, **this CSV does contain
+   extracted EOB data and must be handled as PHI.** See
+   [Structured fields and Open Dental](#structured-fields-and-open-dental).
+5. **Optional structured extraction.** `extract_eob_fields(text)` uses regex
    to pull common EOB fields. This is **best-effort** and varies by payer
    template (see below).
-5. **Logging.** Filenames and extraction methods are logged to stdout. File
+6. **Logging.** Filenames and extraction methods are logged to stdout. File
    contents and extracted text are **never** logged.
 
 ## Files
@@ -124,6 +130,11 @@ python generate_synthetic_eobs.py --output ./synthetic_in
 ```bash
 python run_batch.py --input ./synthetic_in --output ./synthetic_out
 ```
+
+This writes, into the output directory:
+- `<name>.txt` — extracted plain text, one per PDF
+- `<name>.json` — non-PHI metadata sidecar, one per PDF
+- `eob_fields.csv` — one combined worksheet, one row per EOB
 
 Optionally tune the OCR threshold (average chars/page below which OCR runs):
 
@@ -297,9 +308,21 @@ python
 | `Unable to get page count. Is poppler installed and in PATH?` | Redo Step 3.4; reopen Command Prompt. |
 | Scanned PDF produced an almost-empty `.txt` | OCR may have failed — confirm `tesseract --version` works, then re-run. |
 
-## Best-effort field extraction
+## Structured fields and Open Dental
 
-`extract_eob_fields(text)` returns a dict with a stable shape:
+Every batch run writes a combined `eob_fields.csv` to the output directory.
+It has one row per EOB and these columns:
+
+```
+filename, claim_number, date_of_service, billed_amount,
+paid_amount, patient_responsibility, procedure_codes
+```
+
+`procedure_codes` is a `; `-separated list of CDT (`Dxxxx`) / CPT (5-digit)
+codes. Open it in Excel or any spreadsheet program.
+
+The same data is available programmatically — `extract_eob_fields(text)`
+returns a dict with a stable shape:
 
 ```python
 {
@@ -314,7 +337,21 @@ python
 
 **Regex extraction is best-effort and varies by payer template.** EOB
 layouts differ widely between insurers; fields that do not match a pattern
-are returned as `None`. Always verify against the raw extracted text.
+are returned as `None` (empty in the CSV). **Always verify the CSV against
+the original PDF before acting on it** — especially for OCR'd scans.
+
+### Using this with Open Dental
+
+`eob_fields.csv` is a **review worksheet**, not a direct import file.
+Open Dental's automated remittance path is the **X12 835 ERA** file from
+your payer or clearinghouse — it does not import arbitrary text or CSV.
+This tool does **not** produce 835 files; turning a scanned paper EOB into
+a valid 835 reliably is not feasible.
+
+Practical use: open `eob_fields.csv`, verify each row against the PDF, and
+use it as a fast worksheet for **manual entry** into Open Dental. Fully
+automated posting would require either real 835 files from your
+clearinghouse, or a separate integration against the Open Dental API.
 
 ## Dependency licenses
 
